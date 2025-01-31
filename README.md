@@ -1,1 +1,11 @@
 # PnPAudioCheck
+
+In order to build:
+
+1. Check out the current repository and the repository commonLibsCpp;
+2. Add to NuGt sources the local path to "commonLibsCpp\OutputArtifacts"
+3. Set NuGet environment variable to the path of the NuGet executable.
+4. Build the solution
+	- nuget restore PnPAudioCheck.sln
+	- "c:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe" PnPAudioCheck.sln /p:Configuration=Release /target:Rebuild -restore"
+	- dotnet publish \"Projects\\AudioClient\\AudioClient.csproj\" -c Release -p:PublishProfile=FolderProfile"
