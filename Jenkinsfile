@@ -1,4 +1,4 @@
-def SOLUTION_NAME = 'AudioCheck.sln'
+def SOLUTION_NAME = 'PnPAudioCheck.sln'
 
 pipeline {
     agent any
@@ -15,8 +15,8 @@ pipeline {
     stages {
         stage('Build') {
             steps {
+                // "c:\Program Files\Microsoft Visual Studio\2022\Community\Msbuild\Current\Bin\MSBuild.exe"
                 bat "nuget restore \"${SOLUTION_NAME}\""
-                bat "\"${tool 'MSBuild VS2022'}\" \"${SOLUTION_NAME}\" /p:Configuration=Release;LocalProperties=D:\\configurationsNet6\\StrongNameAndSign.xml /target:Rebuild -restore"
                 bat "\"${tool 'MSBuild VS2022'}\" \"${SOLUTION_NAME}\" /p:Configuration=Release /target:Rebuild -restore"
                 bat "dotnet publish \"Projects\\AudioClient\\AudioClient.csproj\" -c Release -p:PublishProfile=FolderProfile"
             }
