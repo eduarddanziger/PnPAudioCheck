@@ -1,0 +1,86 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+    <EnableDefaultApplicationDefinition>false</EnableDefaultApplicationDefinition>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <BaseDirectory>$(MSBuildThisFileDirectory)..\..\</BaseDirectory>
+    <ArtifactsDirectory>$(BaseDirectory)artifacts\</ArtifactsDirectory>
+    <ReleaseNotesFileName>PnPAudioCheck-Release-Notes.md</ReleaseNotesFileName>
+    <ApplicationIcon>resources\Headphone.ico</ApplicationIcon>
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <!-- Enable release-version debugging (optimization off, etc.) -->
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLib\Ed.Common.props" />
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLib\Ed.CSharp.targets" />
+  <ItemGroup>
+    <Content Include="resources\Headphone.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignColors" Version="3.1.0" />
+    <PackageReference Include="MaterialDesignThemes" Version="5.1.0" />
+    <PackageReference Include="MSBuildTasks" Version="1.5.0.235">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.12" />
+    <PackageReference Include="Wpf.Extensions.Hosting" Version="1.2.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <Target Name="CopyDll" AfterTargets="Build">
+      <Copy DestinationFolder="$(OutputPath)" SourceFiles="$(BaseDirectory)x64\$(Configuration)\AudioController.dll" />
+  </Target>
+
+  <Target Name="ProcessReleaseNotes" Condition=" '$(_IsPublishing)' != 'true' " BeforeTargets="BeforeBuild">
+      <PropertyGroup>
+          <ReleaseNotesTargetPathName>$(ArtifactsDirectory)$(ReleaseNotesFileName)</ReleaseNotesTargetPathName>
+      </PropertyGroup>
+      <Copy SourceFiles="$(BaseDirectory)$(ReleaseNotesFileName)" DestinationFolder="$(ArtifactsDirectory)" />
+      <FileUpdate Files="$(ReleaseNotesTargetPathName)" Regex="\$version\$" ReplacementText="$(Version)" />
+      <Time Format="dd.MM.yyyy">
+          <Output TaskParameter="FormattedTime" PropertyName="BuildDate" />
+      </Time>
+      <FileUpdate Files="$(ReleaseNotesTargetPathName)" Regex="\$date\$" ReplacementText="$(BuildDate)" />
+  </Target>
+
+  <Target Name="ZipOutputPath" AfterTargets="Publish">
+      <PropertyGroup>
+          <PublishFullDirectory>$(ProjectDir)$(PublishDir)</PublishFullDirectory>
+          <ZipFileNameSuffix Condition=" '$(Configuration)' == 'Debug' ">-Debug</ZipFileNameSuffix>
+          <ZipFileName>$(ArtifactsDirectory)$(AssemblyName)$(ZipFileNameSuffix)-$(Version).zip</ZipFileName>
+      </PropertyGroup>
+      <Copy DestinationFolder="$(PublishFullDirectory)" SourceFiles="$(ArtifactsDirectory)$(ReleaseNotesFileName)" />
+      <Copy DestinationFolder="$(PublishFullDirectory)" SourceFiles="$(OutputPath)\AudioController.dll" />
+      <Copy DestinationFolder="$(PublishFullDirectory)" SourceFiles="$(BaseDirectory)x64\$(Configuration)\AudioControllerCli.exe" />
+      <ZipDirectory Overwrite="true" SourceDirectory="$(PublishFullDirectory)" DestinationFile="$(ZipFileName)" />
+      <RemoveDir Directories="$(PublishFullDirectory)" />
+  </Target>
+</Project>

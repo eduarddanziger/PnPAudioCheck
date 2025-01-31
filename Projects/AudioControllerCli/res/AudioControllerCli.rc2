@@ -1,0 +1,51 @@
+//
+// CashCtrl.RC2 - resources Microsoft Visual C++ does not edit directly
+//
+
+#ifdef APSTUDIO_INVOKED
+#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+#include "AssemblyInformation.h"
+#include <windows.h>
+
+#ifndef DEBUG
+    #define RESOURCE_CONFIGURATION_FLAG    0
+#else
+    #define RESOURCE_CONFIGURATION_FLAG    VS_FF_DEBUG
+#endif
+
+VS_VERSION_INFO VERSIONINFO
+    FILEVERSION     RESOURCE_VERSION_ATTRIBUTE
+    PRODUCTVERSION  RESOURCE_VERSION_ATTRIBUTE
+    FILEFLAGSMASK   VS_FFI_FILEFLAGSMASK
+    FILEFLAGS       RESOURCE_CONFIGURATION_FLAG
+    FILEOS          VOS_NT_WINDOWS32
+    FILETYPE        VFT_DLL
+    FILESUBTYPE     VFT2_UNKNOWN
+    BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "CompanyName", ASSEMBLY_COMPANY_ATTRIBUTE "\0"
+            VALUE "FileDescription", ASSEMBLY_DESCRIPTION_ATTRIBUTE "\0"
+            VALUE "FileVersion", ASSEMBLY_VERSION_ATTRIBUTE "\0"
+            VALUE "InternalName", ASSEMBLY_TITLE_ATTRIBUTE "\0"
+            VALUE "LegalCopyright", ASSEMBLY_COPYRIGHT_ATTRIBUTE "\0"
+            VALUE "LegalTrademarks", ASSEMBLY_TRADEMARK_ATTRIBUTE "\0"
+            VALUE "OriginalFilename", RESOURCE_FILENAME_ATTRIBUTE "\0"
+            VALUE "ProductName", ASSEMBLY_PRODUCT_ATTRIBUTE "\0"
+            VALUE "ProductVersion", ASSEMBLY_VERSION_ATTRIBUTE "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END
+
+

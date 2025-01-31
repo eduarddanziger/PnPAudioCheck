@@ -1,0 +1,81 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <ProjectGuid>{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>AudioControllerLib</RootNamespace>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+    <Import Project="..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets" Condition="Exists('..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets')" />
+    <Import Project="..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets" Condition="Exists('..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_USRDLL;AC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)DeviceGeneric\CIMGeneric\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <!-- Enable release-version debugging (optimization off, etc.) -->
+      <Optimization Condition="'$(Configuration)'=='Release'">Disabled</Optimization>
+      <IntrinsicFunctions Condition="'$(Configuration)'=='Release'">false</IntrinsicFunctions>
+      <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
+      <FunctionLevelLinking Condition="'$(Configuration)'=='Release'" />
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Windows</SubSystem>
+    </Link>
+    <PostBuildEvent>
+    </PostBuildEvent>
+    <Lib>
+      <LinkTimeCodeGeneration Condition="'$(Configuration)'=='Release'" />
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\AudioController\AudioControlInterface.h" />
+    <ClInclude Include="CaseInsensitiveSubstr.h" />
+    <ClInclude Include="CoInitRaiiHelper.h" />
+    <ClInclude Include="DefToString.h" />
+    <ClInclude Include="Device.h" />
+    <ClInclude Include="DeviceCollection.h" />
+    <ClInclude Include="MultipleNotificationClient.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="Utilities.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Device.cpp" />
+    <ClCompile Include="DeviceCollection.cpp" />
+    <ClCompile Include="MultipleNotificationClient.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.targets" />
+  <Target Name="RunUnitTests" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets'))" />
+    <Error Condition="!Exists('..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets'))" />
+  </Target>
+</Project>

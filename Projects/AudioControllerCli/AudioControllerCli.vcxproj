@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{887D7CD4-2184-467F-AC36-153E627EC218}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>AudioControllerCli</RootNamespace>
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+    <Import Project="..\..\packages\spdlog-native.0.17.0\build\native\spdlog-native.targets" Condition="Exists('..\..\packages\spdlog-native.0.17.0\build\native\spdlog-native.targets')" />
+    <Import Project="..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets" Condition="Exists('..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets')" />
+    <Import Project="..\..\packages\SpdLogger.2.0.3\build\native\SpdLogger.targets" Condition="Exists('..\..\packages\SpdLogger.2.0.3\build\native\SpdLogger.targets')" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <NUGET_PACKAGES Condition=" '$(NUGET_PACKAGES)' == '' ">$(USERPROFILE)\.nuget\packages\</NUGET_PACKAGES>
+    <NUGET_PACKAGES>$([MSBuild]::NormalizeDirectory($(NUGET_PACKAGES)))</NUGET_PACKAGES>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_SILENCE_ALL_CXX17_DEPRECATION_WARNINGS;_SILENCE_STDEXT_ARR_ITERS_DEPRECATION_WARNING;SPDLOG_FMT_PRINTF;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <!-- Enable release-version debugging (optimization off, etc.) -->
+      <Optimization Condition="'$(Configuration)'=='Release'">Disabled</Optimization>
+      <IntrinsicFunctions Condition="'$(Configuration)'=='Release'">false</IntrinsicFunctions>
+      <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
+      <FunctionLevelLinking Condition="'$(Configuration)'=='Release'" />
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <!-- Enable release-version debugging (optimization off, etc.) -->
+      <OptimizeReferences Condition="'$(Configuration)'=='Release'" />
+      <EnableCOMDATFolding Condition="'$(Configuration)'=='Release'" />
+      <LinkTimeCodeGeneration Condition="'$(Configuration)'=='Release'" />
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\AudioControllerLib\generate-uuid.h" />
+    <ClInclude Include="AssemblyInformation.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AudioControllerCli.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="res\AudioControllerCli.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AudioControllerCli.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioController\AudioController.vcxproj">
+      <Project>{92afad2a-a573-4239-80dc-4cdc28fd3a7e}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.targets" />
+  <Target Name="ZipOutput" AfterTargets="Build">
+    <PropertyGroup>
+      <SourceDeliveryFolder>$(OutDir)</SourceDeliveryFolder>
+      <TargetDeliveryFolder>$(SolutionDir)artifacts\</TargetDeliveryFolder>
+      <ZipFileNameSuffix Condition=" '$(Configuration)' == 'Debug' ">-Debug</ZipFileNameSuffix>
+      <ZipFileName>$(AssemblyName)$(ZipFileNameSuffix)-$(PackageVersion).zip</ZipFileName>
+    </PropertyGroup>
+    <Exec WorkingDirectory="$(SourceDeliveryFolder)" Command="$(NUGET_PACKAGES)7-Zip.CommandLine\18.1.0\tools\7za.exe a -tzip -r -x!*.iobj -x!*.*pdb -x!*.lib -x!*.exp -x!*Test*.*pdb &quot;$(TargetDeliveryFolder)$(ZipFileName)&quot; ." />
+  </Target>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties RESOURCE_FILE="AudioControllerCli.rc" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\..\packages\spdlog-native.0.17.0\build\native\spdlog-native.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\spdlog-native.0.17.0\build\native\spdlog-native.targets'))" />
+    <Error Condition="!Exists('..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\CommonCppModules.2.0.3\build\native\CommonCppModules.targets'))" />
+    <Error Condition="!Exists('..\..\packages\SpdLogger.2.0.3\build\native\SpdLogger.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\SpdLogger.2.0.3\build\native\SpdLogger.targets'))" />
+  </Target>
+</Project>

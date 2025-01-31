@@ -1,0 +1,67 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.8.34511.84
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioControllerLib", "Projects\AudioControllerLib\AudioControllerLib.vcxproj", "{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F91E0676-3871-489C-9444-F8979C0B6D46}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		AudioCheck-Release-Notes.md = AudioCheck-Release-Notes.md
+		Jenkinsfile = Jenkinsfile
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioControllerCli", "Projects\AudioControllerCli\AudioControllerCli.vcxproj", "{887D7CD4-2184-467F-AC36-153E627EC218}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioController", "Projects\AudioController\AudioController.vcxproj", "{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AudioControllerLibTests", "Projects\AudioControllerTests\AudioControllerLibTests.vcxproj", "{C9BB6776-0226-499E-80BC-1184D43057D4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AudioClient", "Projects\AudioClient\AudioClient.csproj", "{2C0F0A40-EAA2-4A2D-9891-5FB9F97D2CB0}"
+	ProjectSection(ProjectDependencies) = postProject
+		{887D7CD4-2184-467F-AC36-153E627EC218} = {887D7CD4-2184-467F-AC36-153E627EC218}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}.Debug|Any CPU.Build.0 = Debug|x64
+		{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}.Release|Any CPU.ActiveCfg = Release|x64
+		{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}.Release|Any CPU.Build.0 = Release|x64
+		{6C0FC8C3-0967-4E1C-BE3A-80ECB2140C20}.Release|Any CPU.Deploy.0 = Release|x64
+		{887D7CD4-2184-467F-AC36-153E627EC218}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{887D7CD4-2184-467F-AC36-153E627EC218}.Debug|Any CPU.Build.0 = Debug|x64
+		{887D7CD4-2184-467F-AC36-153E627EC218}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{887D7CD4-2184-467F-AC36-153E627EC218}.Release|Any CPU.ActiveCfg = Release|x64
+		{887D7CD4-2184-467F-AC36-153E627EC218}.Release|Any CPU.Build.0 = Release|x64
+		{887D7CD4-2184-467F-AC36-153E627EC218}.Release|Any CPU.Deploy.0 = Release|x64
+		{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}.Debug|Any CPU.Build.0 = Debug|x64
+		{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}.Release|Any CPU.ActiveCfg = Release|x64
+		{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}.Release|Any CPU.Build.0 = Release|x64
+		{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}.Release|Any CPU.Deploy.0 = Release|x64
+		{C9BB6776-0226-499E-80BC-1184D43057D4}.Debug|Any CPU.ActiveCfg = Debug|x64
+		{C9BB6776-0226-499E-80BC-1184D43057D4}.Debug|Any CPU.Build.0 = Debug|x64
+		{C9BB6776-0226-499E-80BC-1184D43057D4}.Debug|Any CPU.Deploy.0 = Debug|x64
+		{C9BB6776-0226-499E-80BC-1184D43057D4}.Release|Any CPU.ActiveCfg = Release|x64
+		{C9BB6776-0226-499E-80BC-1184D43057D4}.Release|Any CPU.Build.0 = Release|x64
+		{C9BB6776-0226-499E-80BC-1184D43057D4}.Release|Any CPU.Deploy.0 = Release|x64
+		{2C0F0A40-EAA2-4A2D-9891-5FB9F97D2CB0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C0F0A40-EAA2-4A2D-9891-5FB9F97D2CB0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C0F0A40-EAA2-4A2D-9891-5FB9F97D2CB0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C0F0A40-EAA2-4A2D-9891-5FB9F97D2CB0}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {C671421F-7380-4959-B337-7B33904234CC}
+	EndGlobalSection
+EndGlobal

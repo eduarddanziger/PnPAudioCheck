@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <_ProjectFileVersion>10.0.40219.1</_ProjectFileVersion>
+    <ProjectGuid>{92AFAD2A-A573-4239-80DC-4CDC28FD3A7E}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>AudioController</RootNamespace>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <PreprocessorDefinitions>_USRDLL;AC_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)Projects\AudioControllerLib;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <!-- Enable release-version debugging (optimization off, etc.) -->
+      <Optimization Condition="'$(Configuration)'=='Release'">Disabled</Optimization>
+      <IntrinsicFunctions Condition="'$(Configuration)'=='Release'">false</IntrinsicFunctions>
+      <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">false</WholeProgramOptimization>
+      <FunctionLevelLinking Condition="'$(Configuration)'=='Release'" />
+      <LanguageStandard_C>stdc17</LanguageStandard_C>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)\x64\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <!-- Enable release-version debugging (optimization off, etc.) -->
+      <OptimizeReferences Condition="'$(Configuration)'=='Release'" />
+      <EnableCOMDATFolding Condition="'$(Configuration)'=='Release'" />
+      <LinkTimeCodeGeneration Condition="'$(Configuration)'=='Release'" />
+    </Link>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="AssemblyInformation.h" />
+    <ClInclude Include="AudioControlInterface.h" />
+    <ClInclude Include="ClassDefHelper.h" />
+    <ClInclude Include="resource.h" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="AudioCheckDllApi.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="AudioCheckDllApi.cpp" />
+    <ClCompile Include="AudioControlInterface.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="res\AudioController.rc2" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="AudioController.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AudioControllerLib\AudioControllerLib.vcxproj">
+      <Project>{6c0fc8c3-0967-4e1c-be3a-80ecb2140c20}</Project>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.targets" />
+  <Target Name="RunUnitTests" />
+</Project>
