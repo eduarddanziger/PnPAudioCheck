@@ -2,6 +2,14 @@
 
 PnPAudioCheck detects and visualizes plug-and-play audio endpoint devices under Windows. It integrates with audio control interfaces and provides mechanisms to handle audio notifications and device changes.
 
+### Executables Generated
+- **AudioControllerCli**: Command-line interface for audio control.
+- **AudioClient**: Single-device client application GUI.
+
+### Technologies Used
+- **C++**: Core logic implementation.
+- **C#**: GUI and client application.
+
 In order to build:
 
 1. Check out the current repository and the repository commonLibsCpp;
