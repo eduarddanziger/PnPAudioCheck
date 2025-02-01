@@ -1,4 +1,6 @@
-# PnPAudioCheck
+# PnP Audio Check
+
+PnPAudioCheck detects and visualizes plug-and-play audio endpoint devices under Windows. It integrates with audio control interfaces and provides mechanisms to handle audio notifications and device changes.
 
 In order to build:
 
