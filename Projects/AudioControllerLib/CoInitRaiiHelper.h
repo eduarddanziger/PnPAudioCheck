@@ -1,11 +1,13 @@
 ﻿#pragma once
 
+#include <combaseapi.h>
+
 namespace ed {
 class CoInitRaiiHelper {
 public:
     explicit CoInitRaiiHelper(bool apartment = false) : coInitialized_(false)
     {
-        // Attempt to init COM as a STA
+        // Attempt to init COM as STA
         if (const HRESULT ciResult =
                 CoInitializeEx(
                     nullptr

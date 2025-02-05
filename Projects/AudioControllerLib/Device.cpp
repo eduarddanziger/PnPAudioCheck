@@ -2,8 +2,6 @@
 
 #include "Device.h"
 
-#include <stdexcept>
-
 ed::audio::Device::~Device() = default;
 
 ed::audio::Device::Device()

@@ -264,7 +264,7 @@ void ed::audio::DeviceCollection::TraceItDebug(const std::wstring & line) const
 
 void ed::audio::DeviceCollection::UnregisterAllEndpointsVolumes()
 {
-    for (auto & [devId, endpointVolume] : devIdToEndpointVolumes_)
+    for (const auto & endpointVolume : devIdToEndpointVolumes_ | std::views::values)
     {
         // ReSharper disable once CppFunctionResultShouldBeUsed
         endpointVolume->UnregisterControlChangeNotify(this);
@@ -399,7 +399,8 @@ void ed::audio::DeviceCollection::RefreshVolumes()
 }
 
 
-//static
+// ReSharper disable CppPassValueParameterByConstReference
+/*static*/
 void ed::audio::DeviceCollection::RegisterDevice(ed::audio::DeviceCollection* self, const std::wstring& deviceId, const Device& device, EndPointVolumeSmartPtr endpointVolume)
 {
     // ReSharper disable once CppFunctionResultShouldBeUsed
@@ -411,6 +412,7 @@ void ed::audio::DeviceCollection::RegisterDevice(ed::audio::DeviceCollection* se
 
 void ed::audio::DeviceCollection::UpdateDeviceVolume(DeviceCollection* self, const std::wstring& deviceId, const Device& device, EndPointVolumeSmartPtr)
 {
+    // ReSharper restore CppPassValueParameterByConstReference
     const auto pnpGuid = device.GetPnpId();
     if
     (

@@ -8,6 +8,7 @@
 #include "targetver.h"
 
 #ifdef _DEBUG
+// ReSharper disable once CppInconsistentNaming
 #   define _CRTDBG_MAP_ALLOC
 #   include <crtdbg.h>
 #endif
@@ -46,4 +47,4 @@
 
 #define LOG_INFO_COLL(inp, coll) { std::wostringstream oss; \
                 PUT_TO_STREAM_LOG(oss, inp); \
-                coll->TraceIt(oss.str().c_str()); }
+                (coll)->TraceIt(oss.str().c_str()); }
