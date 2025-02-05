@@ -1,7 +1,7 @@
-﻿Audio Check - Release Notes 
+﻿PnP Audio Check - Release Notes 
 =====================================
 ~~~
-Copyright 2024 by Eduard Danziger
+Copyright 2024-2025 by Eduard Danziger
 ~~~
 
 $version$
