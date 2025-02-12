@@ -10,8 +10,8 @@ $version$
 Released on $date$
 ~~~
 
-### Change
-- AudioClient: 
+## Change
+- AudioClient: README added
 --------
 
 2.1.2
@@ -20,6 +20,6 @@ Released on $date$
 Released on 20.12.2024
 ~~~
 
-### Change
+## Change
 - AudioClient: Refresh button is disabled if no device
 - Lib: Mute -> volume set to zero
