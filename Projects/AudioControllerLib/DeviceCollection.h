@@ -49,7 +49,7 @@ private:
 
 
     void NotifyObservers(DeviceCollectionEvent action, const std::wstring & devicePNpId) const;
-    bool IsDeviceApplicable(const Device & device) const;
+    [[nodiscard]] bool IsDeviceApplicable(const Device & device) const;
     CComPtr<IAudioEndpointVolume> TryCreateDeviceAndGetVolumeEndpoint(ULONG i, CComPtr<IMMDevice> deviceEndpointSmartPtr,
                                                                       Device & device, std::wstring & deviceId) const;
 
