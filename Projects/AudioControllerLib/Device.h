@@ -9,7 +9,7 @@ public:
 
 public:
     Device();
-    Device(std::wstring pnpGuid, std::wstring name, DeviceFlowEnum flow, uint16_t volume);
+    Device(std::wstring pnpGuid, std::wstring name, DeviceFlowEnum flow, uint16_t renderVolume);
     Device(const Device & toCopy);
     Device(Device && toMove) noexcept;
     Device & operator=(const Device & toCopy);
@@ -19,13 +19,13 @@ public:
     [[nodiscard]] std::wstring GetName() const override;
     [[nodiscard]] std::wstring GetPnpId() const override;
     [[nodiscard]] DeviceFlowEnum GetFlow() const override;
-    [[nodiscard]] uint16_t GetVolume() const override;
-    void SetVolume(uint16_t volume);
+    [[nodiscard]] uint16_t GetCurrentRenderVolume() const override;
+    void SetCurrentRenderVolume(uint16_t volume);
 
 private:
     std::wstring pnpGuid_;
     std::wstring name_;
     DeviceFlowEnum flow_;
-    uint16_t volume_;
+    uint16_t renderVolume_;
 };
 }

@@ -309,13 +309,13 @@ ed::audio::Device ed::audio::DeviceCollection::MergeDeviceWithExistingOneBasedOn
         ; foundPair != pnpToDeviceMap_.end()
     )
     {
-        auto volume = device.GetVolume();
+        auto volume = device.GetCurrentRenderVolume();
         auto flow = device.GetFlow();
         const auto & foundDev = foundPair->second;
         if (foundDev.GetFlow() != device.GetFlow())
         {
             flow = DeviceFlowEnum::RenderAndCapture;
-            volume = device.GetFlow() == DeviceFlowEnum::Capture ? volume : foundDev.GetVolume();
+            volume = device.GetFlow() == DeviceFlowEnum::Capture ? volume : foundDev.GetCurrentRenderVolume();
         }
         auto foundDevNameAsSet = Split(foundDev.GetName(), L'/');
 
@@ -425,12 +425,12 @@ void ed::audio::DeviceCollection::UpdateDeviceVolume(DeviceCollection* self, con
         {
             if (device.GetFlow() == DeviceFlowEnum::Render)
             {
-                foundDev.SetVolume(device.GetVolume());
+                foundDev.SetCurrentRenderVolume(device.GetCurrentRenderVolume());
             }
         }
         else
         {
-            foundDev.SetVolume(device.GetVolume());
+            foundDev.SetCurrentRenderVolume(device.GetCurrentRenderVolume());
         }
     }
 }
@@ -531,7 +531,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
     const Device & device, Device & unmergedDev) const
 {
     unmergedDev = {
-        device.GetPnpId(), device.GetName(), DeviceFlowEnum::None, device.GetVolume()
+        device.GetPnpId(), device.GetName(), DeviceFlowEnum::None, device.GetCurrentRenderVolume()
     };
 
     if
@@ -540,7 +540,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
         ; foundPair != pnpToDeviceMap_.end()
     )
     {
-        const auto volume = device.GetVolume();
+        const auto volume = device.GetCurrentRenderVolume();
         auto flow = device.GetFlow();
         auto name = device.GetName();
 
@@ -649,9 +649,9 @@ std::vector<std::wstring> ed::audio::DeviceCollection::GetDevicePnPIdsWithChange
         const auto oldPnPId = fst;
         if (auto foundPair = updated.find(oldPnPId); foundPair != updated.end())
         {
-            const auto oldVolume = snd.GetVolume();
+            const auto oldVolume = snd.GetCurrentRenderVolume();
             // ReSharper disable once CppTooWideScopeInitStatement
-            const auto newVolume = foundPair->second.GetVolume();
+            const auto newVolume = foundPair->second.GetCurrentRenderVolume();
             if (oldVolume != newVolume)
             {
                 diff.push_back(oldPnPId);

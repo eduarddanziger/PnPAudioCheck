@@ -54,7 +54,7 @@ public:
         std::wcout << CurrentLocalTimeWithoutDate << L"[" << i << L"]: " << idAsWideString
             << L", \"" << device->GetName()
             << L"\", " << ed::GetFlowAsString(device->GetFlow())
-            << L", Volume " << device->GetVolume()
+            << L", Volume " << device->GetCurrentRenderVolume()
             << std::endl;
     }
 
