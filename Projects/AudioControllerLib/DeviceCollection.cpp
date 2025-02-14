@@ -230,7 +230,21 @@ bool ed::audio::DeviceCollection::TryCreateDeviceAndGetVolumeEndpoint(
         volume = static_cast<uint16_t>(lround(currVolume * 1000.0f));
         LOG_INFO(L"The end point device " << i << L", id \"" << deviceId << L"\", has a volume \"" << volume << L"\".");
     }
-    device = Device(pnpGuid, name, flow, volume);
+	uint16_t renderVolume = 0;
+	uint16_t captureVolume = 0;
+
+    switch (flow)
+    {
+    case DeviceFlowEnum::Capture:
+        captureVolume = volume;
+        break;
+    case DeviceFlowEnum::Render:
+        renderVolume = volume;
+        break;
+    default:
+        break;
+    }
+	device = Device(pnpGuid, name, flow, renderVolume, captureVolume);
     return true;
 }
 
@@ -299,17 +313,31 @@ ed::audio::Device ed::audio::DeviceCollection::MergeDeviceWithExistingOneBasedOn
     {
         auto volume = device.GetCurrentRenderVolume();
         auto flow = device.GetFlow();
+        uint16_t renderVolume = device.GetCurrentRenderVolume();
+		uint16_t captureVolume = device.GetCurrentCaptureVolume();
+
         const auto & foundDev = foundPair->second;
         if (foundDev.GetFlow() != device.GetFlow())
         {
+
+            switch (flow)
+            {
+            case DeviceFlowEnum::Capture:
+                renderVolume = foundDev.GetCurrentRenderVolume();
+                break;
+            case DeviceFlowEnum::Render:
+                captureVolume = foundDev.GetCurrentCaptureVolume();
+            default:
+                break;
+            }
+
             flow = DeviceFlowEnum::RenderAndCapture;
-            volume = device.GetFlow() == DeviceFlowEnum::Capture ? volume : foundDev.GetCurrentRenderVolume();
         }
         auto foundDevNameAsSet = Split(foundDev.GetName(), L'/');
 
         foundDevNameAsSet.insert(device.GetName());
         return {
-            device.GetPnpId(), Merge(foundDevNameAsSet, L'/'), flow, volume
+			device.GetPnpId(), Merge(foundDevNameAsSet, L'/'), flow, renderVolume, captureVolume
         };
     }
     return device;
@@ -413,16 +441,13 @@ void ed::audio::DeviceCollection::UpdateDeviceVolume(DeviceCollection* self, con
     )
     {
         auto& foundDev = foundPair->second;
-        if (foundDev.GetFlow() == DeviceFlowEnum::RenderAndCapture)
+        if (device.GetFlow() == DeviceFlowEnum::Render)
         {
-            if (device.GetFlow() == DeviceFlowEnum::Render)
-            {
-                foundDev.SetCurrentRenderVolume(device.GetCurrentRenderVolume());
-            }
+            foundDev.SetCurrentRenderVolume(device.GetCurrentRenderVolume());
         }
         else
         {
-            foundDev.SetCurrentRenderVolume(device.GetCurrentRenderVolume());
+            foundDev.SetCurrentCaptureVolume(device.GetCurrentCaptureVolume());
         }
     }
 }
@@ -526,7 +551,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
     const Device & device, Device & unmergedDev) const
 {
     unmergedDev = {
-        device.GetPnpId(), device.GetName(), DeviceFlowEnum::None, device.GetCurrentRenderVolume()
+		device.GetPnpId(), device.GetName(), DeviceFlowEnum::None, device.GetCurrentRenderVolume(), device.GetCurrentCaptureVolume()
     };
 
     if
@@ -547,12 +572,29 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
         {
             return true;
         }
+
         if
         (
             foundDev.GetFlow() == DeviceFlowEnum::RenderAndCapture
         )
         {
-            flow = flow == DeviceFlowEnum::Render ? DeviceFlowEnum::Capture : DeviceFlowEnum::Render;
+            uint16_t renderVolume = foundDev.GetCurrentRenderVolume();
+			uint16_t captureVolume = foundDev.GetCurrentCaptureVolume();
+
+            switch (flow)
+            {
+            case DeviceFlowEnum::Capture:
+                flow = DeviceFlowEnum::Render;
+                captureVolume = 0;
+                break;
+            case DeviceFlowEnum::Render:
+                flow = DeviceFlowEnum::Capture;
+                renderVolume = 0;
+                break;
+            default:
+                break;
+            }
+
             // ReSharper disable once CppTooWideScopeInitStatement
             const auto foundDevNameAsSet = Split(foundDev.GetName(), L'/');
             for (const auto & elem : foundDevNameAsSet)
@@ -563,7 +605,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
                     break;
                 }
             }
-            unmergedDev = {device.GetPnpId(), name, flow, volume};
+			unmergedDev = { device.GetPnpId(), name, flow, renderVolume, captureVolume };
             return true;
         }
     }
@@ -644,9 +686,15 @@ std::vector<std::wstring> ed::audio::DeviceCollection::GetDevicePnPIdsWithChange
         const auto oldPnPId = fst;
         if (auto foundPair = updated.find(oldPnPId); foundPair != updated.end())
         {
-            const auto oldVolume = snd.GetCurrentRenderVolume();
-            // ReSharper disable once CppTooWideScopeInitStatement
-            const auto newVolume = foundPair->second.GetCurrentRenderVolume();
+            auto oldVolume = snd.GetCurrentRenderVolume();
+            auto newVolume = foundPair->second.GetCurrentRenderVolume();
+            if (oldVolume != newVolume)
+            {
+                diff.push_back(oldPnPId);
+                continue;
+            }
+			oldVolume = snd.GetCurrentCaptureVolume();
+            newVolume = foundPair->second.GetCurrentCaptureVolume();
             if (oldVolume != newVolume)
             {
                 diff.push_back(oldPnPId);

@@ -71,6 +71,7 @@ public:
     virtual std::wstring GetPnpId() const = 0;
     virtual DeviceFlowEnum GetFlow() const = 0;
     virtual uint16_t GetCurrentRenderVolume() const = 0;
+    virtual uint16_t GetCurrentCaptureVolume() const = 0;
 
     AS_INTERFACE(DeviceInterface);
     DISALLOW_COPY_MOVE(DeviceInterface);
