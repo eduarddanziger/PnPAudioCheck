@@ -355,7 +355,7 @@ void ed::audio::DeviceCollection::ProcessActiveDeviceList(ProcessDeviceFunctionT
 			}
 			isDeviceCreated = TryCreateDeviceAndGetVolumeEndpoint(i, endpointDeviceSmartPtr, device, deviceId, endPointVolumeSmartPtr);
 		}
-		if (isDeviceCreated)
+		if (!isDeviceCreated)
 		{
 			continue;
 		}
