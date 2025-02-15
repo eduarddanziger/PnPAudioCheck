@@ -21,7 +21,7 @@
   <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
     <Import Project="..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets" Condition="Exists('..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets')" />
-    <Import Project="..\..\packages\CommonCppModules.2.0.3-RC046\build\native\CommonCppModules.targets" Condition="Exists('..\..\packages\CommonCppModules.2.0.3-RC046\build\native\CommonCppModules.targets')" />
+    <Import Project="..\..\packages\CommonCppModules.2.1.0\build\native\CommonCppModules.targets" Condition="Exists('..\..\packages\CommonCppModules.2.1.0\build\native\CommonCppModules.targets')" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <ItemDefinitionGroup>
@@ -76,6 +76,6 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\native.magic_enum.0.9.5\build\native\native.magic_enum.targets'))" />
-    <Error Condition="!Exists('..\..\packages\CommonCppModules.2.0.3-RC046\build\native\CommonCppModules.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\CommonCppModules.2.0.3-RC046\build\native\CommonCppModules.targets'))" />
+    <Error Condition="!Exists('..\..\packages\CommonCppModules.2.1.0\build\native\CommonCppModules.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\packages\CommonCppModules.2.1.0\build\native\CommonCppModules.targets'))" />
   </Target>
 </Project>
