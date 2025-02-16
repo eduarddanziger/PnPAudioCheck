@@ -37,6 +37,7 @@ jobs:
       run: msbuild /p:Configuration=Release /target:Rebuild -restore
 
     - name: Publish  MSBuild
+      shell: pwsh
       run: dotnet publish \"Projects\\AudioClient\\AudioClient.csproj\" -c Release -p:PublishProfile=FolderProfile
 
     - name: Upload entire artifacts directory
