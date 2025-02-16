@@ -38,7 +38,7 @@ jobs:
 
     - name: Publish  MSBuild
       shell: pwsh
-      run: dotnet publish \"Projects\\AudioClient\\AudioClient.csproj\" -c Release -p:PublishProfile=FolderProfile
+      run: dotnet publish "Projects/AudioClient/AudioClient.csproj" -c Release -p:PublishProfile=FolderProfile
 
     - name: Upload entire artifacts directory
       uses: actions/upload-artifact@v4
