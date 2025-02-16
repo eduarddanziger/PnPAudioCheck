@@ -1,0 +1,46 @@
+name: Build and save artifacts
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+      with:
+        submodules: true
+  
+    - name: Unshallow repository
+      run: git fetch --prune --unshallow
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v1
+
+    - name: Add GitHub Packages NuGet source
+      shell: pwsh
+      run: |
+        dotnet nuget add source https://nuget.pkg.github.com/eduarddanziger/index.json `
+          --name github `
+          --username eduarddanziger `
+          --password ${{ secrets.NUGET_AUTH_TOKEN }} `
+          --store-password-in-clear-text
+
+    - name: Restore NuGets
+      run: nuget restore PnPAudioCheck.sln
+
+    - name: Build with MSBuild
+      run: msbuild /p:Configuration=Release /target:Rebuild -restore
+
+    - name: Publish  MSBuild
+      run: dotnet publish \"Projects\\AudioClient\\AudioClient.csproj\" -c Release -p:PublishProfile=FolderProfile
+
+    - name: Upload entire artifacts directory
+        uses: actions/upload-artifact@v3
+        with:
+          name: Side-By-Side Zip
+          path: artifacts\

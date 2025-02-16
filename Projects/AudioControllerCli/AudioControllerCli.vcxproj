@@ -82,6 +82,7 @@
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildThisFileDirectory)..\..\msbuildLibCpp\Ed.Cpp.targets" />
+  <!--
   <Target Name="ZipOutput" AfterTargets="Build">
     <PropertyGroup>
       <SourceDeliveryFolder>$(OutDir)</SourceDeliveryFolder>
@@ -91,6 +92,7 @@
     </PropertyGroup>
     <Exec WorkingDirectory="$(SourceDeliveryFolder)" Command="$(NUGET_PACKAGES)7-Zip.CommandLine\18.1.0\tools\7za.exe a -tzip -r -x!*.iobj -x!*.*pdb -x!*.lib -x!*.exp -x!*Test*.*pdb &quot;$(TargetDeliveryFolder)$(ZipFileName)&quot; ." />
   </Target>
+  -->
   <ProjectExtensions>
     <VisualStudio>
       <UserProperties RESOURCE_FILE="AudioControllerCli.rc" />
