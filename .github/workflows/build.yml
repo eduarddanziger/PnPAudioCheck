@@ -40,7 +40,7 @@ jobs:
       run: dotnet publish \"Projects\\AudioClient\\AudioClient.csproj\" -c Release -p:PublishProfile=FolderProfile
 
     - name: Upload entire artifacts directory
-        uses: actions/upload-artifact@v3
-        with:
-          name: Side-By-Side Zip
-          path: artifacts\
+      uses: actions/upload-artifact@v3
+      with:
+        name: Side-By-Side Zip
+        path: artifacts\
