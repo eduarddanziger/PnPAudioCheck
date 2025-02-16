@@ -92,7 +92,7 @@ AcResult AcGetAttached(AcHandle handle, AcDescription* description)
         const auto device = device_collection->CreateItem(0);
         wcsncpy_s(description->Guid, _countof(description->Guid), device->GetPnpId().c_str(), device->GetPnpId().size());
         wcsncpy_s(description->Name, _countof(description->Name), device->GetName().c_str(), device->GetName().size());
-        description->Volume = device->GetVolume();
+        description->Volume = device->GetCurrentRenderVolume();
         return 0;
     }
     description->Guid[0] = '\0';

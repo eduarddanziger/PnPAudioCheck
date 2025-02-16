@@ -95,55 +95,51 @@ void ed::audio::DeviceCollection::Unsubscribe(DeviceCollectionObserverInterface 
 }
 
 
-ed::audio::EndPointVolumeSmartPtr ed::audio::DeviceCollection::TryCreateDeviceAndGetVolumeEndpoint
-(
+bool ed::audio::DeviceCollection::TryCreateDeviceAndGetVolumeEndpoint(
     ULONG i,
-    CComPtr<IMMDevice> deviceEndpointSmartPtr, // NOLINT(performance-unnecessary-value-param)
+    CComPtr<IMMDevice> deviceEndpointSmartPtr,
     Device & device,
-    std::wstring & deviceId
-) const  
-{
+    std::wstring & deviceId,
+    EndPointVolumeSmartPtr & outVolumeEndpoint
+) const {
     HRESULT hr;
     // Get device id
     {
         LPWSTR deviceIdPtr = nullptr;
-        // Get the endpoint ID string.
         hr = deviceEndpointSmartPtr->GetId(&deviceIdPtr);
-        assert(SUCCEEDED(hr));
+        if (FAILED(hr)) {
+            return false;
+        }
         deviceId = deviceIdPtr;
-        LOG_INFO(L"Id of the current point device " << i << L" is \"" << deviceId << L"\".")
-
+        LOG_INFO(L"Id of the current point device " << i << L" is \"" << deviceId << L"\".");
         CoTaskMemFree(deviceIdPtr);
     }
-
     // Get flow direction via IMMEndpoint
     auto flow = DeviceFlowEnum::None;
     {
         EDataFlow lowLevelFlow;
         IMMEndpoint * pEndpoint = nullptr;
-
         hr = deviceEndpointSmartPtr->QueryInterface(__uuidof(IMMEndpoint), reinterpret_cast<void**>(&pEndpoint));
-        assert(SUCCEEDED(hr));
-
+        if (FAILED(hr)) {
+            return false;
+        }
         hr = pEndpoint->GetDataFlow(&lowLevelFlow);
-        assert(SUCCEEDED(hr));
-
+        SAFE_RELEASE(pEndpoint);
+        if (FAILED(hr)) {
+            return false;
+        }
         flow = ConvertFromLowLevelFlow(lowLevelFlow);
-        LOG_INFO(
-            L"The end point device " << i << L", id \"" << deviceId << L"\", has a data flow \"" << GetFlowAsString(flow) << L"\".")
-
-        SAFE_RELEASE(pEndpoint)
+        LOG_INFO(L"The end point device " << i << L", id \"" << deviceId << L"\", has a data flow \"" << GetFlowAsString(flow) << L"\".");
     }
-
     // Read device PnP Class id property
     std::wstring pnpGuid;
     std::wstring name;
     {
         IPropertyStore* pProps = nullptr;
-        hr = deviceEndpointSmartPtr->OpenPropertyStore(
-            STGM_READ, &pProps);
-        assert(SUCCEEDED(hr));
-
+        hr = deviceEndpointSmartPtr->OpenPropertyStore(STGM_READ, &pProps);
+        if (FAILED(hr)) {
+            return false;
+        }
         {
             PROPVARIANT propVarForName;
 
@@ -195,14 +191,13 @@ ed::audio::EndPointVolumeSmartPtr ed::audio::DeviceCollection::TryCreateDeviceAn
             LOG_INFO(
                 L"The end point device " << i << L", id \"" << deviceId << L"\", has a PnP id \"" << pnpGuid << L"\".")
 
-            // ReSharper disable once CppFunctionResultShouldBeUsed
+                // ReSharper disable once CppFunctionResultShouldBeUsed
             PropVariantClear(&propVarForGuid);
         }
-        SAFE_RELEASE(pProps)
+        SAFE_RELEASE(pProps);
     }
-
     // Get IAudioEndpointVolume and volume
-    EndPointVolumeSmartPtr volumeEndPointOrNullSmartPtr;
+    outVolumeEndpoint = nullptr;
     uint16_t volume = 0;
     {
         IAudioEndpointVolume* pEndpointVolume;
@@ -210,40 +205,47 @@ ed::audio::EndPointVolumeSmartPtr ed::audio::DeviceCollection::TryCreateDeviceAn
             __uuidof(IAudioEndpointVolume),
             CLSCTX_INPROC_SERVER,
             nullptr,
-            reinterpret_cast<void**>(&pEndpointVolume));
-        if (SUCCEEDED(hr))
-        {
-            volumeEndPointOrNullSmartPtr = pEndpointVolume;
-            SAFE_RELEASE(pEndpointVolume)
+            reinterpret_cast<void**>(&pEndpointVolume)
+        );
+        if (SUCCEEDED(hr)) {
+            outVolumeEndpoint.Attach(pEndpointVolume);
         }
     }
-
     // Check mute and possibly correct volume
-    if (volumeEndPointOrNullSmartPtr == nullptr)
-    {
-        LOG_INFO(
-            L"The end point device " << i << L", id \"" << deviceId << L"\", has no volume property\n.")
-
-        return volumeEndPointOrNullSmartPtr;
+    if (outVolumeEndpoint == nullptr) {
+        LOG_INFO(L"The end point device " << i << L", id \"" << deviceId << L"\", has no volume property.");
+        return false;
     }
-
     BOOL mute;
-    hr = volumeEndPointOrNullSmartPtr->GetMute(&mute);
-    assert(SUCCEEDED(hr));
-    if (mute == FALSE)
-    {
-        auto currVolume = 0.0f;
-        hr = volumeEndPointOrNullSmartPtr->GetMasterVolumeLevelScalar(&currVolume);
-        assert(SUCCEEDED(hr));
-
-        volume = static_cast<uint16_t>(lround(currVolume * 1000.0f));
-        LOG_INFO(
-            L"The end point device " << i << L", id \"" << deviceId << L"\", has a volume \"" << volume << L"\".\n")
+    hr = outVolumeEndpoint->GetMute(&mute);
+    if (FAILED(hr)) {
+        return false;
     }
+    if (mute == FALSE) {
+        float currVolume = 0.0f;
+        hr = outVolumeEndpoint->GetMasterVolumeLevelScalar(&currVolume);
+        if (FAILED(hr)) {
+            return false;
+        }
+        volume = static_cast<uint16_t>(lround(currVolume * 1000.0f));
+        LOG_INFO(L"The end point device " << i << L", id \"" << deviceId << L"\", has a volume \"" << volume << L"\".");
+    }
+	uint16_t renderVolume = 0;
+	uint16_t captureVolume = 0;
 
-    device = Device(pnpGuid, name, flow, volume);
-
-    return volumeEndPointOrNullSmartPtr;
+    switch (flow)
+    {
+    case DeviceFlowEnum::Capture:
+        captureVolume = volume;
+        break;
+    case DeviceFlowEnum::Render:
+        renderVolume = volume;
+        break;
+    default:
+        break;
+    }
+	device = Device(pnpGuid, name, flow, renderVolume, captureVolume);
+    return true;
 }
 
 void ed::audio::DeviceCollection::TraceIt(const std::wstring & line) const
@@ -264,7 +266,7 @@ void ed::audio::DeviceCollection::TraceItDebug(const std::wstring & line) const
 
 void ed::audio::DeviceCollection::UnregisterAllEndpointsVolumes()
 {
-    for (auto & [devId, endpointVolume] : devIdToEndpointVolumes_)
+    for (const auto & endpointVolume : devIdToEndpointVolumes_ | std::views::values)
     {
         // ReSharper disable once CppFunctionResultShouldBeUsed
         endpointVolume->UnregisterControlChangeNotify(this);
@@ -309,19 +311,33 @@ ed::audio::Device ed::audio::DeviceCollection::MergeDeviceWithExistingOneBasedOn
         ; foundPair != pnpToDeviceMap_.end()
     )
     {
-        auto volume = device.GetVolume();
+        auto volume = device.GetCurrentRenderVolume();
         auto flow = device.GetFlow();
+        uint16_t renderVolume = device.GetCurrentRenderVolume();
+		uint16_t captureVolume = device.GetCurrentCaptureVolume();
+
         const auto & foundDev = foundPair->second;
         if (foundDev.GetFlow() != device.GetFlow())
         {
+
+            switch (flow)
+            {
+            case DeviceFlowEnum::Capture:
+                renderVolume = foundDev.GetCurrentRenderVolume();
+                break;
+            case DeviceFlowEnum::Render:
+                captureVolume = foundDev.GetCurrentCaptureVolume();
+            default:
+                break;
+            }
+
             flow = DeviceFlowEnum::RenderAndCapture;
-            volume = device.GetFlow() == DeviceFlowEnum::Capture ? volume : foundDev.GetVolume();
         }
         auto foundDevNameAsSet = Split(foundDev.GetName(), L'/');
 
         foundDevNameAsSet.insert(device.GetName());
         return {
-            device.GetPnpId(), Merge(foundDevNameAsSet, L'/'), flow, volume
+			device.GetPnpId(), Merge(foundDevNameAsSet, L'/'), flow, renderVolume, captureVolume
         };
     }
     return device;
@@ -350,7 +366,8 @@ void ed::audio::DeviceCollection::ProcessActiveDeviceList(ProcessDeviceFunctionT
 	for (ULONG i = 0; i < count; i++)
 	{
 		Device device;
-		EndPointVolumeSmartPtr endpointVolume;
+		EndPointVolumeSmartPtr endPointVolumeSmartPtr;
+		bool isDeviceCreated = false;
 		std::wstring deviceId;
 		{
 			CComPtr<IMMDevice> endpointDeviceSmartPtr;
@@ -364,9 +381,9 @@ void ed::audio::DeviceCollection::ProcessActiveDeviceList(ProcessDeviceFunctionT
 				}
 				endpointDeviceSmartPtr.Attach(pEndpointDevice);
 			}
-			endpointVolume = TryCreateDeviceAndGetVolumeEndpoint(i, endpointDeviceSmartPtr, device, deviceId);
+			isDeviceCreated = TryCreateDeviceAndGetVolumeEndpoint(i, endpointDeviceSmartPtr, device, deviceId, endPointVolumeSmartPtr);
 		}
-		if (endpointVolume == nullptr)
+		if (!isDeviceCreated)
 		{
 			continue;
 		}
@@ -374,7 +391,7 @@ void ed::audio::DeviceCollection::ProcessActiveDeviceList(ProcessDeviceFunctionT
 		{
 			continue;
 		}
-		processDeviceFunc(this, deviceId, device, endpointVolume);
+		processDeviceFunc(this, deviceId, device, endPointVolumeSmartPtr);
 		LOG_INFO(L"End point " << i << L" with plug-and-play id " << device.GetPnpId() << L" processed.\n")
 	}
 }
@@ -399,18 +416,23 @@ void ed::audio::DeviceCollection::RefreshVolumes()
 }
 
 
-//static
+// ReSharper disable CppPassValueParameterByConstReference
+/*static*/
 void ed::audio::DeviceCollection::RegisterDevice(ed::audio::DeviceCollection* self, const std::wstring& deviceId, const Device& device, EndPointVolumeSmartPtr endpointVolume)
 {
-    // ReSharper disable once CppFunctionResultShouldBeUsed
-    endpointVolume->RegisterControlChangeNotify(self);
-    self->devIdToEndpointVolumes_[deviceId] = endpointVolume;
+    if (endpointVolume != nullptr)
+    {
+        // ReSharper disable once CppFunctionResultShouldBeUsed
+        endpointVolume->RegisterControlChangeNotify(self);
+        self->devIdToEndpointVolumes_[deviceId] = endpointVolume;
+    }
 
     self->pnpToDeviceMap_[device.GetPnpId()] = self->MergeDeviceWithExistingOneBasedOnPnpIdAndFlow(device);
 }
 
 void ed::audio::DeviceCollection::UpdateDeviceVolume(DeviceCollection* self, const std::wstring& deviceId, const Device& device, EndPointVolumeSmartPtr)
 {
+    // ReSharper restore CppPassValueParameterByConstReference
     const auto pnpGuid = device.GetPnpId();
     if
     (
@@ -419,16 +441,13 @@ void ed::audio::DeviceCollection::UpdateDeviceVolume(DeviceCollection* self, con
     )
     {
         auto& foundDev = foundPair->second;
-        if (foundDev.GetFlow() == DeviceFlowEnum::RenderAndCapture)
+        if (device.GetFlow() == DeviceFlowEnum::Render)
         {
-            if (device.GetFlow() == DeviceFlowEnum::Render)
-            {
-                foundDev.SetVolume(device.GetVolume());
-            }
+            foundDev.SetCurrentRenderVolume(device.GetCurrentRenderVolume());
         }
         else
         {
-            foundDev.SetVolume(device.GetVolume());
+            foundDev.SetCurrentCaptureVolume(device.GetCurrentCaptureVolume());
         }
     }
 }
@@ -499,8 +518,8 @@ HRESULT ed::audio::DeviceCollection::OnDeviceAdded(LPCWSTR deviceId)
         Device device;
         if
         (
-            const auto endpointVolume = TryCreateDeviceOnId(deviceId, device);
-            endpointVolume != nullptr && IsDeviceApplicable(device)
+            EndPointVolumeSmartPtr endPointVolumeSmartPtr;
+            TryCreateDeviceOnId(deviceId, device, endPointVolumeSmartPtr) && IsDeviceApplicable(device)
         )
         {
             LOG_INFO(
@@ -515,8 +534,11 @@ HRESULT ed::audio::DeviceCollection::OnDeviceAdded(LPCWSTR deviceId)
             pnpToDeviceMap_[device.GetPnpId()] = possiblyMergedDevice;
 
             // ReSharper disable once CppFunctionResultShouldBeUsed
-            endpointVolume->RegisterControlChangeNotify(this);
-            devIdToEndpointVolumes_[deviceId] = endpointVolume;
+            if (endPointVolumeSmartPtr != nullptr)
+            {
+                endPointVolumeSmartPtr->RegisterControlChangeNotify(this);
+                devIdToEndpointVolumes_[deviceId] = endPointVolumeSmartPtr;
+            }
 
             NotifyObservers(DeviceCollectionEvent::Discovered, device.GetPnpId());
         }
@@ -529,7 +551,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
     const Device & device, Device & unmergedDev) const
 {
     unmergedDev = {
-        device.GetPnpId(), device.GetName(), DeviceFlowEnum::None, device.GetVolume()
+		device.GetPnpId(), device.GetName(), DeviceFlowEnum::None, device.GetCurrentRenderVolume(), device.GetCurrentCaptureVolume()
     };
 
     if
@@ -538,7 +560,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
         ; foundPair != pnpToDeviceMap_.end()
     )
     {
-        const auto volume = device.GetVolume();
+        const auto volume = device.GetCurrentRenderVolume();
         auto flow = device.GetFlow();
         auto name = device.GetName();
 
@@ -550,12 +572,29 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
         {
             return true;
         }
+
         if
         (
             foundDev.GetFlow() == DeviceFlowEnum::RenderAndCapture
         )
         {
-            flow = flow == DeviceFlowEnum::Render ? DeviceFlowEnum::Capture : DeviceFlowEnum::Render;
+            uint16_t renderVolume = foundDev.GetCurrentRenderVolume();
+			uint16_t captureVolume = foundDev.GetCurrentCaptureVolume();
+
+            switch (flow)
+            {
+            case DeviceFlowEnum::Capture:
+                flow = DeviceFlowEnum::Render;
+                captureVolume = 0;
+                break;
+            case DeviceFlowEnum::Render:
+                flow = DeviceFlowEnum::Capture;
+                renderVolume = 0;
+                break;
+            default:
+                break;
+            }
+
             // ReSharper disable once CppTooWideScopeInitStatement
             const auto foundDevNameAsSet = Split(foundDev.GetName(), L'/');
             for (const auto & elem : foundDevNameAsSet)
@@ -566,7 +605,7 @@ bool ed::audio::DeviceCollection::CheckRemovalAndUnmergeDeviceFromExistingOneBas
                     break;
                 }
             }
-            unmergedDev = {device.GetPnpId(), name, flow, volume};
+			unmergedDev = { device.GetPnpId(), name, flow, renderVolume, captureVolume };
             return true;
         }
     }
@@ -582,12 +621,11 @@ HRESULT ed::audio::DeviceCollection::OnDeviceRemoved(LPCWSTR deviceId)
     if (hr == S_OK)
     {
         LOG_INFO(L"REMOVED INFO: device id \"" << deviceId << L".")
-
+        Device removedDeviceToUnmerge;
         if
-        (
-            Device removedDeviceToUnmerge
-            ; TryCreateDeviceOnId(deviceId, removedDeviceToUnmerge) != nullptr && IsDeviceApplicable(
-                removedDeviceToUnmerge)
+        (   EndPointVolumeSmartPtr volumeEndpointSmartPtr;
+            TryCreateDeviceOnId(deviceId, removedDeviceToUnmerge, volumeEndpointSmartPtr)
+            && IsDeviceApplicable(removedDeviceToUnmerge)
         )
         {
             LOG_INFO(
@@ -620,22 +658,23 @@ HRESULT ed::audio::DeviceCollection::OnDeviceRemoved(LPCWSTR deviceId)
     return hr;
 }
 
-ed::audio::EndPointVolumeSmartPtr ed::audio::DeviceCollection::TryCreateDeviceOnId(
-    LPCWSTR deviceId, Device & device) const
-{
+bool ed::audio::DeviceCollection::TryCreateDeviceOnId(
+    LPCWSTR deviceId,
+    Device& device,
+    EndPointVolumeSmartPtr& outVolumeEndpoint
+) const {
     CComPtr<IMMDevice> deviceSmartPtr;
+    // Retrieve the device using the device ID
     {
-        IMMDevice * devicePtr = nullptr;
+        IMMDevice* devicePtr = nullptr;
         const auto hr = enumerator_->GetDevice(deviceId, &devicePtr);
-        if (FAILED(hr))
-        {
-            return nullptr;
+        if (FAILED(hr)) {
+            return false; // Return false on failure
         }
-
         deviceSmartPtr.Attach(devicePtr);
     }
     std::wstring devId;
-    return TryCreateDeviceAndGetVolumeEndpoint(0, deviceSmartPtr, device, devId);
+    return TryCreateDeviceAndGetVolumeEndpoint(0, deviceSmartPtr, device, devId, outVolumeEndpoint);
 }
 
 std::vector<std::wstring> ed::audio::DeviceCollection::GetDevicePnPIdsWithChangedVolume(
@@ -647,9 +686,15 @@ std::vector<std::wstring> ed::audio::DeviceCollection::GetDevicePnPIdsWithChange
         const auto oldPnPId = fst;
         if (auto foundPair = updated.find(oldPnPId); foundPair != updated.end())
         {
-            const auto oldVolume = snd.GetVolume();
-            // ReSharper disable once CppTooWideScopeInitStatement
-            const auto newVolume = foundPair->second.GetVolume();
+            auto oldVolume = snd.GetCurrentRenderVolume();
+            auto newVolume = foundPair->second.GetCurrentRenderVolume();
+            if (oldVolume != newVolume)
+            {
+                diff.push_back(oldPnPId);
+                continue;
+            }
+			oldVolume = snd.GetCurrentCaptureVolume();
+            newVolume = foundPair->second.GetCurrentCaptureVolume();
             if (oldVolume != newVolume)
             {
                 diff.push_back(oldPnPId);

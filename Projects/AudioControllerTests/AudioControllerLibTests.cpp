@@ -29,7 +29,7 @@ TEST_CLASS(AudioControllerLibTests) {
         const auto nameExpected = L"name01"s;
         const auto pnpIdExpected = generate_w_uuid();
 
-        const Device dv(pnpIdExpected, nameExpected, DeviceFlowEnum::Capture, 100);
+        const Device dv(pnpIdExpected, nameExpected, DeviceFlowEnum::Capture, 0, 200);
 
         Assert::AreEqual(nameExpected, dv.GetName());
         Assert::AreEqual(pnpIdExpected, dv.GetPnpId());

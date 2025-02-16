@@ -49,9 +49,13 @@ private:
 
 
     void NotifyObservers(DeviceCollectionEvent action, const std::wstring & devicePNpId) const;
-    bool IsDeviceApplicable(const Device & device) const;
-    CComPtr<IAudioEndpointVolume> TryCreateDeviceAndGetVolumeEndpoint(ULONG i, CComPtr<IMMDevice> deviceEndpointSmartPtr,
-                                                                      Device & device, std::wstring & deviceId) const;
+    [[nodiscard]] bool IsDeviceApplicable(const Device & device) const;
+    bool TryCreateDeviceAndGetVolumeEndpoint(ULONG i,
+                                             CComPtr<IMMDevice> deviceEndpointSmartPtr,
+                                             Device & device,
+                                             std::wstring & deviceId,
+                                             EndPointVolumeSmartPtr & outVolumeEndpoint
+    ) const;
 
     void TraceIt(const std::wstring & line) const;
     void TraceItDebug(const std::wstring & line) const;
@@ -61,7 +65,10 @@ private:
     [[nodiscard]] Device MergeDeviceWithExistingOneBasedOnPnpIdAndFlow(const Device & device) const;
     [[nodiscard]] bool CheckRemovalAndUnmergeDeviceFromExistingOneBasedOnPnpIdAndFlow(const Device & device, Device & unmergedDev) const;
 
-    EndPointVolumeSmartPtr TryCreateDeviceOnId(LPCWSTR deviceId, Device & device) const;
+    bool TryCreateDeviceOnId(LPCWSTR deviceId,
+                                               Device & device,
+                                               EndPointVolumeSmartPtr & outVolumeEndpoint
+    ) const;
 
     static std::vector<std::wstring> GetDevicePnPIdsWithChangedVolume(const TPnPIdToDeviceMap & old,
                                                                       const TPnPIdToDeviceMap & updated);

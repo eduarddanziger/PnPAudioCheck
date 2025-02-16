@@ -1,5 +1,7 @@
 ﻿#pragma once
 
+#include <string>
+
 #include "../AudioController/AudioControlInterface.h"
 
 namespace ed::audio {
@@ -9,7 +11,7 @@ public:
 
 public:
     Device();
-    Device(std::wstring pnpGuid, std::wstring name, DeviceFlowEnum flow, uint16_t volume);
+    Device(std::wstring pnpGuid, std::wstring name, DeviceFlowEnum flow, uint16_t renderVolume, uint16_t captureVolume);
     Device(const Device & toCopy);
     Device(Device && toMove) noexcept;
     Device & operator=(const Device & toCopy);
@@ -19,13 +21,16 @@ public:
     [[nodiscard]] std::wstring GetName() const override;
     [[nodiscard]] std::wstring GetPnpId() const override;
     [[nodiscard]] DeviceFlowEnum GetFlow() const override;
-    [[nodiscard]] uint16_t GetVolume() const override;
-    void SetVolume(uint16_t volume);
+    [[nodiscard]] uint16_t GetCurrentRenderVolume() const override;
+    [[nodiscard]] uint16_t GetCurrentCaptureVolume() const override;
+    void SetCurrentRenderVolume(uint16_t volume);
+    void SetCurrentCaptureVolume(uint16_t volume);
 
 private:
     std::wstring pnpGuid_;
     std::wstring name_;
     DeviceFlowEnum flow_;
-    uint16_t volume_;
+    uint16_t renderVolume_;
+    uint16_t captureVolume_;
 };
 }

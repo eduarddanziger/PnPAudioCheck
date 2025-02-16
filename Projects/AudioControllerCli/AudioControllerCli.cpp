@@ -54,8 +54,9 @@ public:
         std::wcout << CurrentLocalTimeWithoutDate << L"[" << i << L"]: " << idAsWideString
             << L", \"" << device->GetName()
             << L"\", " << ed::GetFlowAsString(device->GetFlow())
-            << L", Volume " << device->GetVolume()
-            << std::endl;
+            << L", Volume " << device->GetCurrentRenderVolume()
+			<< L" / " << device->GetCurrentCaptureVolume()
+            << '\n';
     }
 
     void PrintCollection() const
@@ -65,7 +66,7 @@ public:
             const std::unique_ptr<DeviceInterface> deviceSmartPtr(collection_.CreateItem(i));
             PrintDeviceInfo(deviceSmartPtr.get(), i);
         }
-        std::wcout << std::endl << CurrentLocalTimeWithoutDate << "Press Enter to regenerate device list; To stop, type S or Q and press Enter\n";
+        std::wcout << '\n' << CurrentLocalTimeWithoutDate << "Press Enter to regenerate device list; To stop, type S or Q and press Enter\n";
     }
 
     void ResetCollectionContentAndPrintIt() const
@@ -77,8 +78,8 @@ public:
 
     void OnCollectionChanged(DeviceCollectionEvent event, const std::wstring& devicePnpId) override
     {
-        std::wcout << std::endl << CurrentLocalTimeWithoutDate << L"Event caught: " << ed::GetDeviceCollectionEventAsString(event) << L"."
-            <<  L" Device PnP id: " << devicePnpId << L"\n";
+        std::wcout << '\n' << CurrentLocalTimeWithoutDate << L"Event caught: " << ed::GetDeviceCollectionEventAsString(event) << L"."
+            <<  L" Device PnP id: " << devicePnpId << L'\n';
 
         PrintCollection();
     }
@@ -118,7 +119,7 @@ bool StopAndWaitForInput()
             return true;
         }
 
-        std::wcout << std::endl << CurrentLocalTimeWithoutDate << L"Input " << line << L" not recognized." << std::endl;
+        std::wcout << '\n' << CurrentLocalTimeWithoutDate << L"Input " << line << L" not recognized.\n";
     }
 }
 

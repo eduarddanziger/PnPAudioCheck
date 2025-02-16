@@ -2,7 +2,6 @@
 #pragma once
 
 #include <endpointvolume.h>
-#include <iostream>
 #include <mmdeviceapi.h>
 
 #include "../AudioController/ClassDefHelper.h"
