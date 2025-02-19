@@ -43,5 +43,5 @@ jobs:
     - name: Upload entire artifacts directory
       uses: actions/upload-artifact@v4
       with:
-        name: Side-By-Side App Zip
+        name: Binary Zip
         path: artifacts\
